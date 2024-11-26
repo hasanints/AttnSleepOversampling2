@@ -34,7 +34,7 @@ from imblearn.under_sampling import EditedNearestNeighbours
 from collections import Counter
 import numpy as np
 
-def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_class=4):
+def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_class=2):
     """
     Terapkan SMOTE pada kelas target_smote_class dan ENN pada kelas target_enn_class.
     Args:
