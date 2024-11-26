@@ -185,6 +185,7 @@ def apply_smote_2013_with_shuffle(X_train, y_train, classes = [0, 1, 2, 3, 4]):
 
 
 def data_generator_np(training_files, subject_files, batch_size):
+    classes = [0, 1, 2, 3, 4]
     # Load original data
     X_train = np.load(training_files[0])["x"]
     y_train = np.load(training_files[0])["y"]
