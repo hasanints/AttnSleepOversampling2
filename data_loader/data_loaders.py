@@ -29,56 +29,62 @@ class LoadDataset_from_numpy(Dataset):
         return self.len
 
 
+from sklearn.utils import shuffle
 from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import EditedNearestNeighbours
 from collections import Counter
-import numpy as np
 
+classes = [0, 1, 2, 3, 4]
 
-def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_class=4, enn_neighbors=3):
+def apply_smote_2013_with_shuffle(X_train, y_train, classes):
     """
-    Terapkan SMOTE pada kelas target_smote_class dan ENN pada kelas target_enn_class.
-    Args:
-        X_train (numpy.ndarray): Data fitur dalam format 3D (samples, timepoints, channels).
-        y_train (numpy.ndarray): Label data.
-        target_smote_class (int): Label kelas untuk diterapkan SMOTE (default N1 = 1).
-        target_enn_class (int): Label kelas untuk diterapkan ENN (default REM = 4).
-        enn_neighbors (int): Jumlah tetangga yang digunakan oleh ENN (default = 3).
-    Returns:
-        X_resampled, y_resampled: Data setelah SMOTE dan ENN diterapkan.
+    Menerapkan SMOTE untuk data dengan label numerik (0-4).
     """
-    # Tampilkan distribusi awal
-    print(f"Distribusi kelas awal: {Counter(y_train)}")
 
-    # Ubah data menjadi 2D untuk kompatibilitas
+    # Melihat distribusi kelas sebelum SMOTE
+    class_counts = Counter(y_train)
+    print(f"Distribusi kelas sebelum SMOTE: {class_counts}")
+    
+    # Ubah data menjadi 2D untuk kompatibilitas dengan SMOTE
     X_train_reshaped = X_train.reshape(X_train.shape[0], -1)
+    y_train_flat = y_train.flatten()
 
-    # -------------------------
-    # SMOTE untuk kelas N1
-    # -------------------------
-    smote = SMOTE(sampling_strategy={target_smote_class: Counter(y_train)[target_smote_class] * 2}, random_state=42)
-    X_smote, y_smote = smote.fit_resample(X_train_reshaped, y_train)
+    # Hitung jumlah sampel per kelas
+    nums = [len(np.where(y_train_flat == cl)[0]) for cl in classes]
 
-    # -------------------------
-    # ENN untuk kelas REM
-    # -------------------------
-    enn = EditedNearestNeighbours(sampling_strategy=[target_enn_class], n_neighbors=enn_neighbors)
-    X_enn, y_enn = enn.fit_resample(X_smote, y_smote)
+    # Tentukan rasio SMOTE
+    n_osamples = nums[2] - 7000  # Target oversampling berdasarkan kelas N2
+    ratio = {
+        0: n_osamples if nums[0] < n_osamples else nums[0],
+        1: n_osamples if nums[1] < n_osamples else nums[1],
+        2: nums[2],
+        3: n_osamples if nums[3] < n_osamples else nums[3],
+        4: n_osamples if nums[4] < n_osamples else nums[4]
+    }
 
-    # -------------------------
-    # Kembalikan ke bentuk 3D
-    # -------------------------
-    X_resampled = X_enn.reshape(-1, X_train.shape[1], X_train.shape[2])
+    print(f"Rasio oversampling untuk SMOTE: {ratio}")
 
-    # Tampilkan distribusi setelah SMOTE-ENN
-    print(f"Distribusi kelas setelah SMOTE-ENN: {Counter(y_enn)}")
+    # Inisialisasi SMOTE dengan rasio
+    smote = SMOTE(random_state=42, sampling_strategy=ratio)
 
-    return X_resampled, y_enn
+    # Terapkan SMOTE untuk oversampling kelas minoritas
+    X_resampled, y_resampled = smote.fit_resample(X_train_reshaped, y_train_flat)
+
+    # Kembalikan data ke bentuk 3D seperti aslinya
+    X_resampled = X_resampled.reshape(-1, X_train.shape[1], X_train.shape[2])
+
+    # Shuffle data
+    X_resampled, y_resampled = shuffle(X_resampled, y_resampled, random_state=42)
+    
+    # Melihat distribusi kelas setelah SMOTE
+    print(f"Distribusi kelas setelah SMOTE: {Counter(y_resampled)}")
+    
+    return X_resampled, y_resampled
 
 
 
-from imblearn.combine import SMOTETomek
-from collections import Counter
+
+# from imblearn.combine import SMOTETomek
+# from collections import Counter
 
 # def apply_smote_tomek(X_train, y_train):
 #     # Melihat distribusi kelas sebelum SMOTE-Tomek Link
@@ -188,7 +194,7 @@ def data_generator_np(training_files, subject_files, batch_size):
         y_train = np.append(y_train, np.load(np_file)["y"])
 
     # Apply SMOTE
-    X_resampled, y_resampled = apply_custom_smote_enn(X_train, y_train)
+    X_resampled, y_resampled = apply_smote_2013_with_shuffle(X_train, y_train)
 
     # Calculate data_count for class weights
     unique, counts = np.unique(y_resampled, return_counts=True)
