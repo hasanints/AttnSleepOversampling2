@@ -34,7 +34,8 @@ from imblearn.under_sampling import EditedNearestNeighbours
 from collections import Counter
 import numpy as np
 
-def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_class=2):
+
+def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_class=4, enn_neighbors=9):
     """
     Terapkan SMOTE pada kelas target_smote_class dan ENN pada kelas target_enn_class.
     Args:
@@ -42,6 +43,7 @@ def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_cl
         y_train (numpy.ndarray): Label data.
         target_smote_class (int): Label kelas untuk diterapkan SMOTE (default N1 = 1).
         target_enn_class (int): Label kelas untuk diterapkan ENN (default REM = 4).
+        enn_neighbors (int): Jumlah tetangga yang digunakan oleh ENN (default = 3).
     Returns:
         X_resampled, y_resampled: Data setelah SMOTE dan ENN diterapkan.
     """
@@ -60,7 +62,7 @@ def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_cl
     # -------------------------
     # ENN untuk kelas REM
     # -------------------------
-    enn = EditedNearestNeighbours(sampling_strategy=[target_enn_class])
+    enn = EditedNearestNeighbours(sampling_strategy=[target_enn_class], n_neighbors=enn_neighbors)
     X_enn, y_enn = enn.fit_resample(X_smote, y_smote)
 
     # -------------------------
@@ -72,6 +74,7 @@ def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_cl
     print(f"Distribusi kelas setelah SMOTE-ENN: {Counter(y_enn)}")
 
     return X_resampled, y_enn
+
 
 
 from imblearn.combine import SMOTETomek
