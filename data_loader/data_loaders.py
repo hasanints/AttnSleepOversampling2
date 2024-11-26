@@ -29,30 +29,75 @@ class LoadDataset_from_numpy(Dataset):
         return self.len
 
 
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import EditedNearestNeighbours
+from collections import Counter
+import numpy as np
+
+def apply_custom_smote_enn(X_train, y_train, target_smote_class=1, target_enn_class=4):
+    """
+    Terapkan SMOTE pada kelas target_smote_class dan ENN pada kelas target_enn_class.
+    Args:
+        X_train (numpy.ndarray): Data fitur dalam format 3D (samples, timepoints, channels).
+        y_train (numpy.ndarray): Label data.
+        target_smote_class (int): Label kelas untuk diterapkan SMOTE (default N1 = 1).
+        target_enn_class (int): Label kelas untuk diterapkan ENN (default REM = 4).
+    Returns:
+        X_resampled, y_resampled: Data setelah SMOTE dan ENN diterapkan.
+    """
+    # Tampilkan distribusi awal
+    print(f"Distribusi kelas awal: {Counter(y_train)}")
+
+    # Ubah data menjadi 2D untuk kompatibilitas
+    X_train_reshaped = X_train.reshape(X_train.shape[0], -1)
+
+    # -------------------------
+    # SMOTE untuk kelas N1
+    # -------------------------
+    smote = SMOTE(sampling_strategy={target_smote_class: Counter(y_train)[target_smote_class] * 2}, random_state=42)
+    X_smote, y_smote = smote.fit_resample(X_train_reshaped, y_train)
+
+    # -------------------------
+    # ENN untuk kelas REM
+    # -------------------------
+    enn = EditedNearestNeighbours(sampling_strategy=[target_enn_class])
+    X_enn, y_enn = enn.fit_resample(X_smote, y_smote)
+
+    # -------------------------
+    # Kembalikan ke bentuk 3D
+    # -------------------------
+    X_resampled = X_enn.reshape(-1, X_train.shape[1], X_train.shape[2])
+
+    # Tampilkan distribusi setelah SMOTE-ENN
+    print(f"Distribusi kelas setelah SMOTE-ENN: {Counter(y_enn)}")
+
+    return X_resampled, y_enn
+
+
 from imblearn.combine import SMOTETomek
 from collections import Counter
 
-def apply_smote_tomek(X_train, y_train):
-    # Melihat distribusi kelas sebelum SMOTE-Tomek Link
-    class_counts = Counter(y_train)
-    print(f"Distribusi kelas sebelum SMOTE-Tomek Link: {class_counts}")
+# def apply_smote_tomek(X_train, y_train):
+#     # Melihat distribusi kelas sebelum SMOTE-Tomek Link
+#     class_counts = Counter(y_train)
+#     print(f"Distribusi kelas sebelum SMOTE-Tomek Link: {class_counts}")
     
-    # Inisialisasi SMOTE-Tomek Link
-    smote_tomek = SMOTETomek(random_state=42)
+#     # Inisialisasi SMOTE-Tomek Link
+#     smote_tomek = SMOTETomek(random_state=42)
     
-    # Ubah data menjadi 2D untuk kompatibilitas dengan SMOTE-Tomek
-    X_train_reshaped = X_train.reshape(X_train.shape[0], -1)  # Mengubah menjadi 2D
+#     # Ubah data menjadi 2D untuk kompatibilitas dengan SMOTE-Tomek
+#     X_train_reshaped = X_train.reshape(X_train.shape[0], -1)  # Mengubah menjadi 2D
     
-    # Terapkan SMOTE-Tomek Link untuk oversampling dan pembersihan
-    X_resampled, y_resampled = smote_tomek.fit_resample(X_train_reshaped, y_train)
+#     # Terapkan SMOTE-Tomek Link untuk oversampling dan pembersihan
+#     X_resampled, y_resampled = smote_tomek.fit_resample(X_train_reshaped, y_train)
     
-    # Kembalikan data ke bentuk 3D seperti aslinya
-    X_resampled = X_resampled.reshape(-1, X_train.shape[1], X_train.shape[2])
+#     # Kembalikan data ke bentuk 3D seperti aslinya
+#     X_resampled = X_resampled.reshape(-1, X_train.shape[1], X_train.shape[2])
     
-    # Melihat distribusi kelas setelah SMOTE-Tomek Link
-    print(f"Distribusi kelas setelah SMOTE-Tomek Link: {Counter(y_resampled)}")
+#     # Melihat distribusi kelas setelah SMOTE-Tomek Link
+#     print(f"Distribusi kelas setelah SMOTE-Tomek Link: {Counter(y_resampled)}")
     
-    return X_resampled, y_resampled
+#     return X_resampled, y_resampled
 
 
 # def apply_smote_enn(X_train, y_train):
@@ -140,7 +185,7 @@ def data_generator_np(training_files, subject_files, batch_size):
         y_train = np.append(y_train, np.load(np_file)["y"])
 
     # Apply SMOTE
-    X_resampled, y_resampled = apply_smote_tomek(X_train, y_train)
+    X_resampled, y_resampled = apply_custom_smote_enn(X_train, y_train)
 
     # Calculate data_count for class weights
     unique, counts = np.unique(y_resampled, return_counts=True)
