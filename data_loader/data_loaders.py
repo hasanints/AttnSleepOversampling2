@@ -33,9 +33,9 @@ from sklearn.utils import shuffle
 from imblearn.over_sampling import SMOTE
 from collections import Counter
 
-classes = [0, 1, 2, 3, 4]
 
-def apply_smote_2013_with_shuffle(X_train, y_train, classes):
+
+def apply_smote_2013_with_shuffle(X_train, y_train, classes = [0, 1, 2, 3, 4]):
     """
     Menerapkan SMOTE untuk data dengan label numerik (0-4).
     """
@@ -194,7 +194,7 @@ def data_generator_np(training_files, subject_files, batch_size):
         y_train = np.append(y_train, np.load(np_file)["y"])
 
     # Apply SMOTE
-    X_resampled, y_resampled = apply_smote_2013_with_shuffle(X_train, y_train)
+    X_resampled, y_resampled = apply_smote_2013_with_shuffle(X_train, y_train, classes)
 
     # Calculate data_count for class weights
     unique, counts = np.unique(y_resampled, return_counts=True)
