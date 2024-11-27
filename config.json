@@ -1,5 +1,5 @@
 {
-    "name": "sleep_edf20_apply_smote_with_shuffle_exp1",
+    "name": "sleep_edf20_apply_adasyn_class_1_exp1",
     "n_gpu": 1,
 
     "arch": {
