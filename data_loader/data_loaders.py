@@ -36,30 +36,30 @@ from collections import Counter
 from imblearn.over_sampling import ADASYN
 from collections import Counter
 
-def apply_adasyn_class_1(X_train, y_train):
-    # Melihat distribusi kelas sebelum ADASYN
-    class_counts = Counter(y_train)
-    print(f"Distribusi kelas sebelum ADASYN: {class_counts}")
+# def apply_adasyn_class_1(X_train, y_train):
+#     # Melihat distribusi kelas sebelum ADASYN
+#     class_counts = Counter(y_train)
+#     print(f"Distribusi kelas sebelum ADASYN: {class_counts}")
     
-    # Hanya melakukan oversampling untuk kelas 1
-    sampling_strategy = {1: class_counts[1] * 2}  # Oversample kelas 1 (misalnya 2x jumlah saat ini)
+#     # Hanya melakukan oversampling untuk kelas 1
+#     sampling_strategy = {1: class_counts[1] * 2}  # Oversample kelas 1 (misalnya 2x jumlah saat ini)
     
-    # Inisialisasi ADASYN dengan sampling strategy hanya untuk kelas 1
-    adasyn = ADASYN(random_state=42, sampling_strategy=sampling_strategy)
+#     # Inisialisasi ADASYN dengan sampling strategy hanya untuk kelas 1
+#     adasyn = ADASYN(random_state=42, sampling_strategy=sampling_strategy)
     
-    # Ubah data menjadi 2D untuk kompatibilitas dengan ADASYN
-    X_train_reshaped = X_train.reshape(X_train.shape[0], -1)
+#     # Ubah data menjadi 2D untuk kompatibilitas dengan ADASYN
+#     X_train_reshaped = X_train.reshape(X_train.shape[0], -1)
     
-    # Terapkan ADASYN untuk oversampling hanya pada kelas 1
-    X_resampled, y_resampled = adasyn.fit_resample(X_train_reshaped, y_train)
+#     # Terapkan ADASYN untuk oversampling hanya pada kelas 1
+#     X_resampled, y_resampled = adasyn.fit_resample(X_train_reshaped, y_train)
     
-    # Kembalikan data ke bentuk 3D seperti aslinya
-    X_resampled = X_resampled.reshape(-1, X_train.shape[1], X_train.shape[2])
+#     # Kembalikan data ke bentuk 3D seperti aslinya
+#     X_resampled = X_resampled.reshape(-1, X_train.shape[1], X_train.shape[2])
     
-    # Melihat distribusi kelas setelah ADASYN
-    print(f"Distribusi kelas setelah ADASYN: {Counter(y_resampled)}")
+#     # Melihat distribusi kelas setelah ADASYN
+#     print(f"Distribusi kelas setelah ADASYN: {Counter(y_resampled)}")
     
-    return X_resampled, y_resampled
+#     return X_resampled, y_resampled
 
 
 
@@ -109,79 +109,79 @@ def apply_adasyn_class_1(X_train, y_train):
 #     return X_resampled, y_resampled
 
 
-# from collections import Counter
-# import numpy as np
-# from imblearn.over_sampling import SMOTE
+from collections import Counter
+import numpy as np
+from imblearn.over_sampling import SMOTE
 
-# def apply_smote_2018_with_shuffle(X_train, y_train, n_oversampling=35000):
-#     """
-#     Terapkan SMOTE untuk data versi 2018 dengan pengaturan oversampling tertentu,
-#     penghapusan data dari kelas mayoritas, dan shuffle data setelahnya.
+def apply_smote_2018_with_shuffle(X_train, y_train, n_oversampling=35000):
+    """
+    Terapkan SMOTE untuk data versi 2018 dengan pengaturan oversampling tertentu,
+    penghapusan data dari kelas mayoritas, dan shuffle data setelahnya.
     
-#     Args:
-#     X_train : numpy.ndarray
-#         Data fitur pelatihan dengan dimensi 3D (samples, time, features).
-#     y_train : numpy.ndarray
-#         Label pelatihan dalam format 1D (dengan angka 0-4 untuk kelas).
-#     n_oversampling : int, optional
-#         Target jumlah sampel setelah oversampling (default: 35000).
+    Args:
+    X_train : numpy.ndarray
+        Data fitur pelatihan dengan dimensi 3D (samples, time, features).
+    y_train : numpy.ndarray
+        Label pelatihan dalam format 1D (dengan angka 0-4 untuk kelas).
+    n_oversampling : int, optional
+        Target jumlah sampel setelah oversampling (default: 35000).
         
-#     Returns:
-#     X_resampled, y_resampled : numpy.ndarray
-#         Data fitur dan label setelah diterapkan SMOTE dan shuffle.
-#     """
-#     # Reshape data ke 2D
-#     X_train_reshaped = X_train.reshape(X_train.shape[0], -1)
-#     y_train = y_train.flatten()
+    Returns:
+    X_resampled, y_resampled : numpy.ndarray
+        Data fitur dan label setelah diterapkan SMOTE dan shuffle.
+    """
+    # Reshape data ke 2D
+    X_train_reshaped = X_train.reshape(X_train.shape[0], -1)
+    y_train = y_train.flatten()
 
-#     # Distribusi kelas sebelum SMOTE
-#     print(f"Distribusi kelas sebelum SMOTE: {Counter(y_train)}")
+    # Distribusi kelas sebelum SMOTE
+    print(f"Distribusi kelas sebelum SMOTE: {Counter(y_train)}")
 
-#     # Undersampling untuk kelas 'W' (0 - Wake)
-#     under_sample_len = 35000
-#     W_indices = np.where(y_train == 0)[0]  # 0 mewakili kelas 'W'
-#     if len(W_indices) > under_sample_len:
-#         np.random.seed(42)  # Untuk konsistensi
-#         permute = np.random.permutation(W_indices)
-#         W_indices_to_remove = permute[:len(W_indices) - under_sample_len]
-#         y_train = np.delete(y_train, W_indices_to_remove, axis=0)
-#         X_train_reshaped = np.delete(X_train_reshaped, W_indices_to_remove, axis=0)
+    # Undersampling untuk kelas 'W' (0 - Wake)
+    under_sample_len = 35000
+    W_indices = np.where(y_train == 0)[0]  # 0 mewakili kelas 'W'
+    if len(W_indices) > under_sample_len:
+        np.random.seed(42)  # Untuk konsistensi
+        permute = np.random.permutation(W_indices)
+        W_indices_to_remove = permute[:len(W_indices) - under_sample_len]
+        y_train = np.delete(y_train, W_indices_to_remove, axis=0)
+        X_train_reshaped = np.delete(X_train_reshaped, W_indices_to_remove, axis=0)
 
-#     # Undersampling untuk kelas 'N2' (2 - Light Sleep N2)
-#     N2_indices = np.where(y_train == 2)[0]  # 2 mewakili kelas 'N2'
-#     if len(N2_indices) > under_sample_len:
-#         np.random.seed(42)
-#         permute = np.random.permutation(N2_indices)
-#         N2_indices_to_remove = permute[:len(N2_indices) - under_sample_len]
-#         y_train = np.delete(y_train, N2_indices_to_remove, axis=0)
-#         X_train_reshaped = np.delete(X_train_reshaped, N2_indices_to_remove, axis=0)
+    # Undersampling untuk kelas 'N2' (2 - Light Sleep N2)
+    N2_indices = np.where(y_train == 2)[0]  # 2 mewakili kelas 'N2'
+    if len(N2_indices) > under_sample_len:
+        np.random.seed(42)
+        permute = np.random.permutation(N2_indices)
+        N2_indices_to_remove = permute[:len(N2_indices) - under_sample_len]
+        y_train = np.delete(y_train, N2_indices_to_remove, axis=0)
+        X_train_reshaped = np.delete(X_train_reshaped, N2_indices_to_remove, axis=0)
 
-#     # Distribusi setelah undersampling
-#     print(f"Distribusi kelas setelah undersampling: {Counter(y_train)}")
+    # Distribusi setelah undersampling
+    print(f"Distribusi kelas setelah undersampling: {Counter(y_train)}")
 
-#     # Tentukan rasio SMOTE untuk setiap kelas
-#     nums = [len(np.where(y_train == label)[0]) for label in range(len(Counter(y_train)))]
-#     ratio = {
-#         label: n_oversampling if nums[label] < n_oversampling else nums[label]
-#         for label in range(len(nums))
-#     }
+    # Tentukan rasio SMOTE untuk setiap kelas
+    nums = [len(np.where(y_train == label)[0]) for label in range(len(Counter(y_train)))]
+    ratio = {
+        label: n_oversampling if nums[label] < n_oversampling else nums[label]
+        for label in range(len(nums))
+    }
 
-#     # Terapkan SMOTE
-#     smote = SMOTE(random_state=42, sampling_strategy=ratio)
-#     X_resampled, y_resampled = smote.fit_resample(X_train_reshaped, y_train)
+    # Terapkan SMOTE
+    smote = SMOTE(random_state=42, sampling_strategy=ratio)
+    X_resampled, y_resampled = smote.fit_resample(X_train_reshaped, y_train)
 
-#     # Distribusi setelah SMOTE
-#     print(f"Distribusi kelas setelah SMOTE: {Counter(y_resampled)}")
+    # Distribusi setelah SMOTE
+    print(f"Distribusi kelas setelah SMOTE: {Counter(y_resampled)}")
 
-#     # Reshape kembali ke 3D
-#     X_resampled = X_resampled.reshape(-1, X_train.shape[1], X_train.shape[2])
+    # Reshape kembali ke 3D
+    X_resampled = X_resampled.reshape(-1, X_train.shape[1], X_train.shape[2])
 
-#     # Shuffle data
-#     permute = np.random.permutation(len(y_resampled))
-#     X_resampled = X_resampled[permute]
-#     y_resampled = y_resampled[permute]
+    # Shuffle data
+    permute = np.random.permutation(len(y_resampled))
+    X_resampled = X_resampled[permute]
+    y_resampled = y_resampled[permute]
 
-#     return X_resampled, y_resampled
+    return X_resampled, y_resampled
 
 
 
@@ -297,7 +297,7 @@ def data_generator_np(training_files, subject_files, batch_size):
         y_train = np.append(y_train, np.load(np_file)["y"])
 
     # Apply SMOTE
-    X_resampled, y_resampled = apply_adasyn_class_1(X_train, y_train)
+    X_resampled, y_resampled = apply_smote_2018_with_shuffle(X_train, y_train)
 
     # Calculate data_count for class weights
     unique, counts = np.unique(y_resampled, return_counts=True)
